@@ -1,5 +1,544 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Test</title></head>
-<body><h1>Test Elie3M ok</h1></body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elie3M Business</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+<style>
+  :root {
+    --primary: #0f766e;
+    --primary-dark: #0b5b55;
+    --bg: #f5f7f6;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --danger: #b91c1c;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #111827; --card: #1f2937; --text: #f9fafb; --muted: #9ca3af; --border: #374151; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  header.top {
+    background: var(--primary); color: #fff; padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    position: sticky; top: 0; z-index: 10;
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  }
+  header.top .brand { font-weight: 700; font-size: 18px; color: #fff; text-decoration: none; }
+  header.top .logo { height: 40px; width: auto; background: #fff; border-radius: 8px; padding: 4px 8px; display: block; }
+  main { max-width: 760px; margin: 0 auto; padding: 18px; }
+  .card { background: var(--card); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; border: 1px solid var(--border); }
+  h1 { font-size: 22px; margin: 8px 0 12px; }
+  h2 { font-size: 18px; margin: 0 0 10px; }
+  p { line-height: 1.5; }
+  button, .btn {
+    background: var(--primary); color: #fff; border: none; padding: 10px 16px;
+    border-radius: 8px; font-size: 15px; cursor: pointer; text-decoration: none; display: inline-block;
+  }
+  button:hover { background: var(--primary-dark); }
+  button.secondary { background: var(--card); color: var(--primary); border: 1px solid var(--primary); }
+  button.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.5); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  label { display: block; font-size: 14px; color: var(--muted); margin: 12px 0 4px; }
+  input, textarea, select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 16px; font-family: inherit; background: var(--card); color: var(--text);
+  }
+  textarea { min-height: 90px; resize: vertical; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .msg { font-size: 14px; margin-top: 10px; min-height: 1em; }
+  .msg.error { color: var(--danger); }
+  .msg.ok { color: var(--primary); }
+  .hidden { display: none !important; }
+  .grid-2 { display: grid; grid-template-columns: 1fr; gap: 0 14px; }
+  @media (min-width: 620px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+  .badge { display: inline-block; font-size: 12px; padding: 3px 8px; border-radius: 999px; background: #fef3c7; color: #92400e; }
+  .badge.ok { background: #d1fae5; color: #065f46; }
+  .muted { color: var(--muted); font-size: 14px; }
+  .url-box { font-family: monospace; font-size: 14px; background: var(--bg); padding: 10px; border-radius: 8px; word-break: break-all; margin-top: 10px; }
+
+  /* Modèle vitrine */
+  .site { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); background: var(--card); }
+  .site-hero { background: var(--primary); color: #fff; padding: 28px 20px; text-align: center; }
+  .site-hero h1 { margin: 0; font-size: 26px; }
+  .site-hero .cat { opacity: .85; font-size: 14px; margin-top: 4px; }
+  .logo-placeholder { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,.2); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 24px; }
+  .site-body { padding: 20px; }
+  .site-body p { white-space: pre-line; }
+  .site-info div { margin: 6px 0; font-size: 15px; white-space: pre-line; }
+  .site-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .site-actions a { text-decoration: none; background: var(--primary); color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 15px; }
+  .site-actions a.wa { background: #25d366; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="#/"><img src="logo.jpg" alt="Elie3MDigital" class="logo"></a>
+  <nav id="nav"></nav>
+</header>
+
+<main>
+  <div id="app-error" class="card hidden">
+    <p class="msg error" id="app-error-text"></p>
+  </div>
+
+  <!-- ACCUEIL -->
+  <section id="p-home" class="page">
+    <div class="card">
+      <h1>Créez votre vitrine en ligne en quelques minutes</h1>
+      <p>Renseignez vos informations, prévisualisez et publiez. Aucune compétence en programmation n'est nécessaire.</p>
+      <p class="muted">Un mois d'essai gratuit à l'inscription.</p>
+      <div class="row">
+        <a class="btn" href="#/inscription">Créer mon compte</a>
+        <a class="btn secondary" href="#/connexion">Se connecter</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSCRIPTION -->
+  <section id="p-signup" class="page hidden">
+    <div class="card">
+      <h2>Créer mon compte</h2>
+      <label>Nom complet</label>
+      <input id="su-name" autocomplete="name">
+      <label>Adresse e-mail</label>
+      <input id="su-email" type="email" autocomplete="email">
+      <label>Mot de passe (8 caractères minimum)</label>
+      <input id="su-pass" type="password" autocomplete="new-password">
+      <div class="row">
+        <button id="su-btn" onclick="signup()">S'inscrire</button>
+        <a class="btn secondary" href="#/">Retour</a>
+      </div>
+      <div id="su-msg" class="msg"></div>
+    </div>
+  </section>
+
+  <!-- CONNEXION -->
+  <section id="p-login" class="page hidden">
+    <div class="card">
+      <h2>Se connecter</h2>
+      <label>Adresse e-mail</label>
+      <input id="li-email" type="email" autocomplete="email">
+      <label>Mot de passe</label>
+      <input id="li-pass" type="password" autocomplete="current-password">
+      <div class="row">
+        <button id="li-btn" onclick="login()">Se connecter</button>
+        <a class="btn secondary" href="#/">Retour</a>
+      </div>
+      <div id="li-msg" class="msg"></div>
+    </div>
+  </section>
+
+  <!-- TABLEAU DE BORD -->
+  <section id="p-dashboard" class="page hidden">
+    <div class="card">
+      <h2 id="dash-hello">Bonjour</h2>
+      <p class="muted" id="dash-sub"></p>
+      <div class="row">
+        <a class="btn" href="#/editeur">Créer / modifier ma vitrine</a>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Ma vitrine</h2>
+      <div id="dash-site" class="muted">Chargement…</div>
+    </div>
+  </section>
+
+  <!-- ÉDITEUR -->
+  <section id="p-editor" class="page hidden">
+    <div class="card">
+      <h2>Ma vitrine</h2>
+      <div class="grid-2">
+        <div>
+          <label>Nom de l'entreprise</label>
+          <input id="f-name" oninput="renderPreview()">
+        </div>
+        <div>
+          <label>Catégorie d'activité</label>
+          <select id="f-cat" onchange="renderPreview()">
+            <option>Boutique</option>
+            <option>Restaurant</option>
+            <option>Salon de coiffure / beauté</option>
+            <option>Artisan</option>
+            <option>Services professionnels</option>
+            <option>Entreprise / PME</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+      <label>Description</label>
+      <textarea id="f-desc" oninput="renderPreview()"></textarea>
+      <div class="grid-2">
+        <div>
+          <label>Adresse ou zone d'intervention</label>
+          <input id="f-address" oninput="renderPreview()">
+        </div>
+        <div>
+          <label>Téléphone</label>
+          <input id="f-phone" type="tel" oninput="renderPreview()">
+        </div>
+        <div>
+          <label>WhatsApp (indicatif + numéro, ex. 24101234567)</label>
+          <input id="f-wa" type="tel" oninput="renderPreview()">
+        </div>
+        <div>
+          <label>Horaires d'ouverture</label>
+          <textarea id="f-hours" style="min-height:60px" oninput="renderPreview()"></textarea>
+        </div>
+      </div>
+      <div class="row">
+        <button class="secondary" onclick="saveDraft()" style="background:var(--card)">Enregistrer le brouillon</button>
+        <button onclick="goPreview()">Prévisualiser</button>
+      </div>
+      <div id="ed-msg" class="msg"></div>
+    </div>
+  </section>
+
+  <!-- APERÇU + PUBLICATION -->
+  <section id="p-preview" class="page hidden">
+    <div class="card">
+      <h2>Prévisualisation</h2>
+      <div id="site-preview"></div>
+    </div>
+    <div class="card">
+      <p>Publiez votre vitrine pour la rendre accessible à tous les visiteurs.</p>
+      <div class="row">
+        <a class="btn secondary" href="#/editeur" style="background:var(--card)">Modifier</a>
+        <button onclick="publish()">Publier ma vitrine</button>
+      </div>
+      <div id="pub-msg" class="msg"></div>
+      <div id="pub-url"></div>
+    </div>
+  </section>
+
+  <!-- VITRINE PUBLIQUE -->
+  <section id="p-public" class="page hidden">
+    <div id="public-site"></div>
+  </section>
+</main>
+
+<script>
+  const SUPABASE_URL = 'https://jahakfqozwvdiphuiway.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_ZCHOdMUciIFTPuVkAkk1gw_lUJGTnc_';
+
+  let sb = null;
+  try {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true }
+    });
+  } catch (e) {
+    showError('Le module de connexion n\'a pas pu être chargé. Vérifiez votre connexion internet, puis actualisez la page.');
+  }
+
+  let currentUser = null;
+  let currentSite = null;
+  let currentSub = null;
+
+  function showError(text) {
+    document.getElementById('app-error-text').textContent = text;
+    document.getElementById('app-error').classList.remove('hidden');
+  }
+
+  function show(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+    window.scrollTo(0, 0);
+  }
+
+  async function route() {
+    try {
+      if (!sb) { show('p-home'); return; }
+      const path = (location.hash || '#/').replace(/^#/, '');
+      const { data } = await sb.auth.getSession();
+      currentUser = data.session ? data.session.user : null;
+      renderNav();
+
+      if (path.startsWith('/v/')) return showPublic(decodeURIComponent(path.slice(3)));
+      if (path === '/inscription') return show('p-signup');
+      if (path === '/connexion') return show('p-login');
+      if (path === '/tableau' || path === '/editeur' || path === '/apercu') {
+        if (!currentUser) { location.hash = '#/connexion'; return; }
+        if (path === '/tableau') return loadDashboard();
+        if (path === '/editeur') return loadEditor();
+        if (path === '/apercu') return goPreview();
+      }
+      show('p-home');
+    } catch (e) {
+      showError('Erreur au chargement : ' + e.message);
+      show('p-home');
+    }
+  }
+
+  function renderNav() {
+    const nav = document.getElementById('nav');
+    nav.innerHTML = currentUser
+      ? '<a class="btn ghost" href="#/tableau" style="background:transparent">Tableau de bord</a>'
+      : '<a class="btn ghost" href="#/connexion" style="background:transparent">Connexion</a>';
+  }
+
+  window.addEventListener('hashchange', route);
+
+  function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  function setMsg(id, text, isError) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'msg ' + (isError ? 'error' : 'ok');
+  }
+
+  async function signup() {
+    const name = document.getElementById('su-name').value.trim();
+    const email = document.getElementById('su-email').value.trim();
+    const pass = document.getElementById('su-pass').value;
+    const btn = document.getElementById('su-btn');
+    if (name.length < 2) return setMsg('su-msg', 'Veuillez saisir votre nom.', true);
+    if (!isEmail(email)) return setMsg('su-msg', 'Adresse e-mail invalide.', true);
+    if (pass.length < 8) return setMsg('su-msg', 'Le mot de passe doit contenir au moins 8 caractères.', true);
+
+    btn.disabled = true;
+    const { data, error } = await sb.auth.signUp({
+      email, password: pass,
+      options: { data: { nom_complet: name } }
+    });
+    btn.disabled = false;
+    if (error) return setMsg('su-msg', traduireErreur(error), true);
+
+    if (!data.session) {
+      return setMsg('su-msg', 'Compte créé. Vérifiez votre boîte e-mail pour confirmer votre adresse, puis connectez-vous.', false);
+    }
+    location.hash = '#/tableau';
+  }
+
+  async function login() {
+    const email = document.getElementById('li-email').value.trim();
+    const pass = document.getElementById('li-pass').value;
+    const btn = document.getElementById('li-btn');
+    if (!isEmail(email) || !pass) return setMsg('li-msg', 'E-mail ou mot de passe incorrect.', true);
+
+    btn.disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    btn.disabled = false;
+    if (error) return setMsg('li-msg', traduireErreur(error), true);
+    location.hash = '#/tableau';
+  }
+
+  async function logout() {
+    await sb.auth.signOut();
+    currentUser = null;
+    currentSite = null;
+    location.hash = '#/';
+  }
+
+  function traduireErreur(error) {
+    const m = (error.message || '').toLowerCase();
+    if (m.includes('invalid login')) return 'E-mail ou mot de passe incorrect.';
+    if (m.includes('already registered') || m.includes('already been registered')) return 'Un compte existe déjà avec cette adresse.';
+    if (m.includes('email not confirmed')) return 'Confirmez d\'abord votre adresse e-mail.';
+    if (m.includes('rate limit')) return 'Trop de tentatives. Réessayez dans quelques minutes.';
+    return 'Une erreur est survenue : ' + error.message;
+  }
+
+  async function loadDashboard() {
+    show('p-dashboard');
+    const { data: profile } = await sb.from('profiles').select('nom_complet').eq('id', currentUser.id).maybeSingle();
+    document.getElementById('dash-hello').textContent = 'Bonjour ' + (profile?.nom_complet || '');
+
+    const { data: subs } = await sb.from('abonnements')
+      .select('formule, statut, date_fin').eq('proprietaire', currentUser.id)
+      .order('date_fin', { ascending: false }).limit(1);
+    currentSub = subs && subs[0];
+    document.getElementById('dash-sub').textContent = currentSub
+      ? `Formule : ${currentSub.formule} (${currentSub.statut}), jusqu'au ${new Date(currentSub.date_fin).toLocaleDateString('fr-FR')}`
+      : 'Aucun abonnement trouvé.';
+
+    const { data: sites } = await sb.from('vitrines').select('*').eq('proprietaire', currentUser.id).limit(1);
+    currentSite = sites && sites[0];
+    const box = document.getElementById('dash-site');
+    if (!currentSite) {
+      box.textContent = 'Vous n\'avez pas encore de vitrine.';
+    } else if (currentSite.statut === 'publiee') {
+      box.innerHTML = `<span class="badge ok">Publiée</span><div class="url-box">${urlVitrine(currentSite.slug)}</div>`;
+    } else {
+      box.innerHTML = `<span class="badge">Brouillon</span>`;
+    }
+  }
+
+  async function loadEditor() {
+    if (!currentSite) {
+      const { data: sites } = await sb.from('vitrines').select('*').eq('proprietaire', currentUser.id).limit(1);
+      currentSite = sites && sites[0] ? sites[0] : null;
+    }
+    const s = currentSite || {};
+    document.getElementById('f-name').value = s.nom_entreprise || '';
+    document.getElementById('f-cat').value = s.categorie || 'Boutique';
+    document.getElementById('f-desc').value = s.description || '';
+    document.getElementById('f-address').value = s.adresse || '';
+    document.getElementById('f-phone').value = s.telephone || '';
+    document.getElementById('f-wa').value = s.whatsapp || '';
+    document.getElementById('f-hours').value = s.horaires || '';
+    document.getElementById('ed-msg').textContent = '';
+    show('p-editor');
+  }
+
+  function readEditor() {
+    return {
+      nom_entreprise: document.getElementById('f-name').value.trim(),
+      categorie: document.getElementById('f-cat').value,
+      description: document.getElementById('f-desc').value.trim() || null,
+      adresse: document.getElementById('f-address').value.trim() || null,
+      telephone: document.getElementById('f-phone').value.trim() || null,
+      whatsapp: document.getElementById('f-wa').value.replace(/\D/g, '') || null,
+      horaires: document.getElementById('f-hours').value.trim() || null,
+    };
+  }
+
+  async function saveDraft() {
+    const data = readEditor();
+    if (data.nom_entreprise.length < 2) {
+      setMsg('ed-msg', 'Le nom de l\'entreprise est obligatoire.', true);
+      return false;
+    }
+    if (data.whatsapp && !/^[0-9]{6,20}$/.test(data.whatsapp)) {
+      setMsg('ed-msg', 'Le numéro WhatsApp doit contenir uniquement des chiffres (6 à 20).', true);
+      return false;
+    }
+
+    if (currentSite) {
+      const { data: updated, error } = await sb.from('vitrines')
+        .update(data).eq('id', currentSite.id).select().single();
+      if (error) { setMsg('ed-msg', traduireErreurBase(error), true); return false; }
+      currentSite = updated;
+    } else {
+      const slug = creerSlug(data.nom_entreprise);
+      const { data: created, error } = await sb.from('vitrines')
+        .insert({ ...data, proprietaire: currentUser.id, slug, statut: 'brouillon' })
+        .select().single();
+      if (error) { setMsg('ed-msg', traduireErreurBase(error), true); return false; }
+      currentSite = created;
+    }
+    setMsg('ed-msg', 'Brouillon enregistré.', false);
+    return true;
+  }
+
+  async function goPreview() {
+    if (!currentSite) {
+      const ok = await saveDraft();
+      if (!ok) return;
+    }
+    show('p-preview');
+    renderPreview();
+    document.getElementById('pub-msg').textContent = '';
+    document.getElementById('pub-url').innerHTML = '';
+  }
+
+  function renderPreview() {
+    const box = document.getElementById('site-preview');
+    if (!box) return;
+    const s = readEditor();
+    if (!s.nom_entreprise) {
+      box.innerHTML = '<p class="muted">Renseignez au moins le nom de l\'entreprise.</p>';
+      return;
+    }
+    box.innerHTML = renderSite(s);
+  }
+
+  async function publish() {
+    const msg = 'pub-msg';
+    const data = readEditor();
+    if (!data.nom_entreprise) return setMsg(msg, 'Le nom de l\'entreprise est obligatoire.', true);
+    if (!data.telephone && !data.whatsapp) return setMsg(msg, 'Ajoutez au moins un téléphone ou un WhatsApp.', true);
+
+    const saved = await saveDraft();
+    if (!saved || !currentSite) return;
+
+    const { data: pub, error } = await sb.from('vitrines')
+      .update({ statut: 'publiee' }).eq('id', currentSite.id).select().single();
+    if (error) return setMsg(msg, traduireErreurBase(error), true);
+    currentSite = pub;
+    setMsg(msg, 'Votre vitrine est publiée.', false);
+    document.getElementById('pub-url').innerHTML = `<div class="url-box">${urlVitrine(pub.slug)}</div>`;
+  }
+
+  async function showPublic(slug) {
+    show('p-public');
+    const box = document.getElementById('public-site');
+    box.innerHTML = '<p class="muted">Chargement…</p>';
+    const { data, error } = await sb.from('vitrines')
+      .select('nom_entreprise, categorie, description, adresse, telephone, whatsapp, horaires')
+      .eq('slug', slug).eq('statut', 'publiee').maybeSingle();
+    if (error || !data) {
+      box.innerHTML = '<div class="card"><p>Cette vitrine n\'est pas disponible.</p></div>';
+      return;
+    }
+    box.innerHTML = renderSite(data);
+  }
+
+  function renderSite(s) {
+    const initial = (s.nom_entreprise || '?').charAt(0).toUpperCase();
+    const wa = s.whatsapp ? `<a class="wa" href="https://wa.me/${escapeHtml(s.whatsapp)}" target="_blank" rel="noopener">WhatsApp</a>` : '';
+    const tel = s.telephone ? `<a href="tel:${escapeHtml(s.telephone)}">Appeler</a>` : '';
+    return `
+      <div class="site">
+        <div class="site-hero">
+          <div class="logo-placeholder">${escapeHtml(initial)}</div>
+          <h1>${escapeHtml(s.nom_entreprise)}</h1>
+          <div class="cat">${escapeHtml(s.categorie || '')}</div>
+        </div>
+        <div class="site-body">
+          <p>${escapeHtml(s.description || '')}</p>
+          <div class="site-info">
+            ${s.adresse ? `<div>📍 ${escapeHtml(s.adresse)}</div>` : ''}
+            ${s.telephone ? `<div>📞 ${escapeHtml(s.telephone)}</div>` : ''}
+            ${s.horaires ? `<div>🕒 ${escapeHtml(s.horaires)}</div>` : ''}
+          </div>
+          <div class="site-actions">${tel}${wa}</div>
+        </div>
+      </div>`;
+  }
+
+  function urlVitrine(slug) {
+    return location.origin + location.pathname + '#/v/' + encodeURIComponent(slug);
+  }
+
+  function creerSlug(nom) {
+    const base = nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'ma-vitrine';
+    const suffixe = Math.random().toString(36).slice(2, 6);
+    return base + '-' + suffixe;
+  }
+
+  function traduireErreurBase(error) {
+    const m = (error.message || '').toLowerCase();
+    if (m.includes('duplicate') || m.includes('unique')) return 'Cette adresse de vitrine existe déjà. Essayez un autre nom.';
+    if (m.includes('row-level security')) return 'Action non autorisée pour ce compte.';
+    if (m.includes('check constraint')) return 'Une information saisie n\'est pas valide.';
+    return 'Erreur : ' + error.message;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  if (sb) {
+    sb.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') { currentUser = null; currentSite = null; renderNav(); }
+    });
+  }
+
+  route();
+</script>
+</body>
 </html>
