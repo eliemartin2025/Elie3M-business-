@@ -35,6 +35,7 @@
     padding-top: calc(14px + env(safe-area-inset-top, 0px));
   }
   header.top .brand { font-weight: 700; font-size: 18px; color: #fff; text-decoration: none; }
+  header.top .brand { display: flex; align-items: center; gap: 10px; }
   header.top .logo { height: 40px; width: auto; background: #fff; border-radius: 8px; padding: 4px 8px; display: block; }
   main { max-width: 760px; margin: 0 auto; padding: 18px; }
   .card { background: var(--card); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; border: 1px solid var(--border); }
@@ -84,7 +85,7 @@
 <body>
 
 <header class="top">
-  <a class="brand" href="#/"><img src="logo.png" alt="Elie3MDigital" class="logo"></a>
+  <a class="brand" href="#/"><img src="logo.png" alt="Elie3MDigital" class="logo"><span>Elie3M Business</span></a>
   <nav id="nav"></nav>
 </header>
 
