@@ -55,4 +55,21 @@
     font-size: 16px; font-family: inherit; background: var(--card); color: var(--text);
   }
   textarea { min-height: 90px; resize: vertical; }
-  .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top:
+  .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .msg { font-size: 14px; margin-top: 10px; min-height: 1em; }
+  .msg.error { color: var(--danger); }
+  .msg.ok { color: var(--primary); }
+  .hidden { display: none !important; }
+  .grid-2 { display: grid; grid-template-columns: 1fr; gap: 0 14px; }
+  @media (min-width: 620px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+  .badge { display: inline-block; font-size: 12px; padding: 3px 8px; border-radius: 999px; background: #fef3c7; color: #92400e; }
+  .badge.ok { background: #d1fae5; color: #065f46; }
+  .muted { color: var(--muted); font-size: 14px; }
+  .url-box { font-family: monospace; font-size: 14px; background: var(--bg); padding: 10px; border-radius: 8px; word-break: break-all; margin-top: 10px; }
+
+  /* Modèle vitrine */
+  .site { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); background: var(--card); }
+  .site-hero { background: var(--primary); color: #fff; padding: 28px 20px; text-align: center; }
+  .site-hero h1 { margin: 0; font-size: 26px; }
+  .site-hero .cat { opacity: .85; font-size: 14px; margin-top: 4px; }
+  .logo-placeholder { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,.2); margin: 0 auto 10px; display: flex; align-items: center; justify-content:
