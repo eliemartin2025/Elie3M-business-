@@ -236,7 +236,7 @@
   let sb = null;
   try {
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true }
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
     });
   } catch (e) {
     showError('Le module de connexion n\'a pas pu être chargé. Vérifiez votre connexion internet, puis actualisez la page.');
@@ -260,9 +260,23 @@
   async function route() {
     try {
       if (!sb) { show('p-home'); return; }
-      const path = (location.hash || '#/').replace(/^#/, '');
+
+      // Supabase lit le jeton du lien de confirmation dans l'adresse et ouvre la session
       const { data } = await sb.auth.getSession();
       currentUser = data.session ? data.session.user : null;
+
+      let path = (location.hash || '#/').replace(/^#/, '');
+
+      // Retour du lien de confirmation e-mail : l'adresse contient un jeton, on la nettoie
+      if (path.includes('access_token=') || path.includes('type=')) {
+        history.replaceState(null, '', location.pathname + '#/tableau');
+        path = '/tableau';
+      } else if (path.includes('error=')) {
+        history.replaceState(null, '', location.pathname + '#/connexion');
+        path = '/connexion';
+        showError('Ce lien de confirmation a expiré ou n\'est pas valide. Refaites une inscription ou connectez-vous.');
+      }
+
       renderNav();
 
       if (path.startsWith('/v/')) return showPublic(decodeURIComponent(path.slice(3)));
@@ -310,7 +324,7 @@
     btn.disabled = true;
     const { data, error } = await sb.auth.signUp({
       email, password: pass,
-      options: { data: { nom_complet: name } }
+      options: { data: { nom_complet: name }, emailRedirectTo: location.origin + location.pathname }
     });
     btn.disabled = false;
     if (error) return setMsg('su-msg', traduireErreur(error), true);
